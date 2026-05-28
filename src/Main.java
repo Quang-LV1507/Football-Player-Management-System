@@ -10,6 +10,7 @@
 import java.util.Scanner;
 
 public class Main {
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
@@ -49,27 +50,105 @@ public class Main {
                 playerType, status
         );
 
-        // Input Training Session
-        System.out.println("\n===== ENTER TRAINING SESSION =====");
+        // Training Session List
+        TrainingSessionList trainingSessionList = new TrainingSessionList();
 
-        System.out.print("Training ID: ");
-        String trainingId = sc.nextLine();
+        int trainingChoice;
 
-        System.out.print("Training Date: ");
-        String trainingDate = sc.nextLine();
+        do {
+            System.out.println("\n===== TRAINING SESSION MANAGEMENT =====");
+            System.out.println("1. Add training session");
+            System.out.println("2. Display all training sessions");
+            System.out.println("3. Search training session by ID");
+            System.out.println("4. Update training session");
+            System.out.println("5. Delete training session");
+            System.out.println("6. Exit training session management");
+            System.out.print("Choose option: ");
 
-        System.out.print("Training Location: ");
-        String trainingLocation = sc.nextLine();
+            trainingChoice = Integer.parseInt(sc.nextLine());
 
-        System.out.print("Training Topic: ");
-        String trainingTopic = sc.nextLine();
+            switch (trainingChoice) {
+                case 1:
+                    System.out.println("\n===== ADD TRAINING SESSION =====");
 
-        TrainingSession training = new TrainingSession(
-                trainingId,
-                trainingDate,
-                trainingLocation,
-                trainingTopic
-        );
+                    System.out.print("Training ID: ");
+                    String trainingId = sc.nextLine();
+
+                    System.out.print("Training Date: ");
+                    String trainingDate = sc.nextLine();
+
+                    System.out.print("Training Location: ");
+                    String trainingLocation = sc.nextLine();
+
+                    System.out.print("Training Topic: ");
+                    String trainingTopic = sc.nextLine();
+
+                    TrainingSession training = new TrainingSession(
+                            trainingId,
+                            trainingDate,
+                            trainingLocation,
+                            trainingTopic
+                    );
+
+                    trainingSessionList.addTrainingSession(training);
+                    break;
+
+                case 2:
+                    System.out.println("\n===== ALL TRAINING SESSIONS =====");
+                    trainingSessionList.displayAllTrainingSessions();
+                    break;
+
+                case 3:
+                    System.out.println("\n===== SEARCH TRAINING SESSION =====");
+
+                    System.out.print("Enter Training ID to search: ");
+                    String searchId = sc.nextLine();
+
+                    trainingSessionList.displayTrainingSessionById(searchId);
+                    break;
+
+                case 4:
+                    System.out.println("\n===== UPDATE TRAINING SESSION =====");
+
+                    System.out.print("Enter Training ID to update: ");
+                    String updateId = sc.nextLine();
+
+                    System.out.print("New Training Date: ");
+                    String newDate = sc.nextLine();
+
+                    System.out.print("New Training Location: ");
+                    String newLocation = sc.nextLine();
+
+                    System.out.print("New Training Topic: ");
+                    String newTopic = sc.nextLine();
+
+                    trainingSessionList.updateTrainingSession(
+                            updateId,
+                            newDate,
+                            newLocation,
+                            newTopic
+                    );
+                    break;
+
+                case 5:
+                    System.out.println("\n===== DELETE TRAINING SESSION =====");
+
+                    System.out.print("Enter Training ID to delete: ");
+                    String deleteId = sc.nextLine();
+
+                    trainingSessionList.deleteTrainingSession(deleteId);
+                    break;
+
+                case 6:
+                    System.out.println("Exit training session management.");
+                    break;
+
+                default:
+                    System.out.println("Invalid option. Please choose again.");
+                    break;
+            }
+
+        } while (trainingChoice != 6);
 
         // Input Match
         System.out.println("\n===== ENTER MATCH INFORMATION =====");
@@ -141,8 +220,8 @@ public class Main {
         System.out.println("\n===== PLAYER =====");
         player.displayPlayerInfo();
 
-        System.out.println("\n===== TRAINING SESSION =====");
-        training.displayTrainingSession();
+        System.out.println("\n===== TRAINING SESSION LIST =====");
+        trainingSessionList.displayAllTrainingSessions();
 
         System.out.println("\n===== MATCH =====");
         match.displayMatchInfo();
