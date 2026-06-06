@@ -1,71 +1,123 @@
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class TrainingSessionList {
+    private ArrayList<TrainingSession> trainingSessions;
 
-    private ArrayList<TrainingSession> trainingList = new ArrayList<>();
+    public TrainingSessionList() {
+        trainingSessions = new ArrayList<>();
+    }
 
-    // Add
-    public void addTrainingSession(TrainingSession training) {
-        trainingList.add(training);
+    public void manageTrainingSessions(Scanner sc) {
+        int choice;
+
+        do {
+            System.out.println("\n===== TRAINING SESSION MANAGEMENT =====");
+            System.out.println("1. Add training session");
+            System.out.println("2. Display all training sessions");
+            System.out.println("3. Search training session by ID");
+            System.out.println("4. Update training session");
+            System.out.println("5. Delete training session");
+            System.out.println("6. Exit training session management");
+            choice = Player.inputMenuChoice(sc, "Choose option: ", 1, 6);
+
+            switch (choice) {
+                case 1:
+                    TrainingSession training = new TrainingSession();
+                    training.inputTrainingSessionInfo(sc);
+                    addTrainingSession(training);
+                    break;
+
+                case 2:
+                    System.out.println("\n===== ALL TRAINING SESSIONS =====");
+                    displayAllTrainingSessions();
+                    break;
+
+                case 3:
+                    System.out.println("\n===== SEARCH TRAINING SESSION =====");
+                    String searchId = Player.inputNumericString(sc, "Enter Training ID to search: ", "Training ID");
+                    displayTrainingSessionById(searchId);
+                    break;
+
+                case 4:
+                    System.out.println("\n===== UPDATE TRAINING SESSION =====");
+                    String updateId = Player.inputNumericString(sc, "Enter Training ID to update: ", "Training ID");
+                    updateTrainingSession(updateId, sc);
+                    break;
+
+                case 5:
+                    System.out.println("\n===== DELETE TRAINING SESSION =====");
+                    String deleteId = Player.inputNumericString(sc, "Enter Training ID to delete: ", "Training ID");
+                    deleteTrainingSession(deleteId);
+                    break;
+
+                case 6:
+                    System.out.println("Exit training session management.");
+                    break;
+            }
+        } while (choice != 6);
+    }
+
+    public void addTrainingSession(TrainingSession trainingSession) {
+        if (searchTrainingSessionById(trainingSession.getTrainingId()) != null) {
+            System.out.println("Training ID already exists. Cannot add duplicate training session.");
+            return;
+        }
+
+        trainingSessions.add(trainingSession);
         System.out.println("Training session added successfully.");
     }
 
-    // Display all
-    public void displayAllTrainingSessions() {
-        if (trainingList.isEmpty()) {
-            System.out.println("No training sessions available.");
-        } else {
-            for (TrainingSession training : trainingList) {
-                training.displayTrainingSession();
-                System.out.println("-------------------------");
-            }
-        }
-    }
-
-    // Search by ID
     public TrainingSession searchTrainingSessionById(String trainingId) {
-        for (TrainingSession training : trainingList) {
-            if (training.getTrainingId().equalsIgnoreCase(trainingId)) {
-                return training;
+        for (TrainingSession trainingSession : trainingSessions) {
+            if (trainingSession.getTrainingId().equalsIgnoreCase(trainingId.trim())) {
+                return trainingSession;
             }
         }
         return null;
     }
 
-    // Display search result
     public void displayTrainingSessionById(String trainingId) {
-        TrainingSession training = searchTrainingSessionById(trainingId);
+        TrainingSession trainingSession = searchTrainingSessionById(trainingId);
 
-        if (training != null) {
-            training.displayTrainingSession();
+        if (trainingSession != null) {
+            trainingSession.displayTrainingSessionInfo();
         } else {
             System.out.println("Training session not found.");
         }
     }
 
-    // Update
-    public void updateTrainingSession(String trainingId, String newDate, String newLocation, String newTopic) {
-        TrainingSession training = searchTrainingSessionById(trainingId);
+    public void updateTrainingSession(String trainingId, Scanner sc) {
+        TrainingSession trainingSession = searchTrainingSessionById(trainingId);
 
-        if (training != null) {
-            training.setTrainingDate(newDate);
-            training.setTrainingLocation(newLocation);
-            training.setTrainingTopic(newTopic);
+        if (trainingSession != null) {
+            trainingSession.updateTrainingSessionInfo(sc);
             System.out.println("Training session updated successfully.");
         } else {
             System.out.println("Training session not found.");
         }
     }
 
-    // Delete
     public void deleteTrainingSession(String trainingId) {
-        TrainingSession training = searchTrainingSessionById(trainingId);
+        TrainingSession trainingSession = searchTrainingSessionById(trainingId);
 
-        if (training != null) {
-            trainingList.remove(training);
+        if (trainingSession != null) {
+            trainingSessions.remove(trainingSession);
             System.out.println("Training session deleted successfully.");
         } else {
             System.out.println("Training session not found.");
+        }
+    }
+
+    public void displayAllTrainingSessions() {
+        if (trainingSessions.isEmpty()) {
+            System.out.println("No training sessions available.");
+            return;
+        }
+
+        for (TrainingSession trainingSession : trainingSessions) {
+            trainingSession.displayTrainingSessionInfo();
+            System.out.println("-----------------------------");
         }
     }
 }

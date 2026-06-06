@@ -1,12 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+import java.time.LocalDate;
+import java.util.Scanner;
 
-/**
- *
- * @author Windows
- */
 public class Contract {
     private String contractId;
     private String playerId;
@@ -16,23 +10,72 @@ public class Contract {
     private String endDate;
     private String status;
 
+    public Contract() {
+    }
+
     public Contract(String contractId, String playerId, String playerType,
                     double baseSalary, String startDate, String endDate, String status) {
-        this.contractId = contractId;
-        this.playerId = playerId;
-        this.playerType = playerType;
-        this.baseSalary = baseSalary;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.status = status;
+        setContractId(contractId);
+        setPlayerId(playerId);
+        setPlayerType(playerType);
+        setBaseSalary(baseSalary);
+        setStartDate(startDate);
+        setEndDate(endDate);
+        validateEndDateAfterStartDate();
+        setStatus(status);
+    }
+
+    public void inputContractInfo(Scanner sc, Player player) {
+        System.out.println("\n===== ENTER CONTRACT INFORMATION =====");
+
+        contractId = Player.inputNumericString(sc, "Contract ID: ", "Contract ID");
+        playerId = player.getPlayerId();
+        playerType = player.getPlayerType();
+        baseSalary = player.getBaseSalary();
+        status = player.getStatus();
+        startDate = Player.inputDateString(sc, "Start Date (yyyy-MM-dd): ", "Start date");
+        endDate = Player.inputEndDateAfterStartDate(sc, "End Date (yyyy-MM-dd): ", startDate);
+    }
+
+    public void updateContractInfo(Scanner sc, Player player) {
+        System.out.println("\n===== UPDATE CONTRACT INFORMATION =====");
+
+        playerType = player.getPlayerType();
+        baseSalary = player.getBaseSalary();
+        status = player.getStatus();
+        startDate = Player.inputDateString(sc, "New Start Date (yyyy-MM-dd): ", "Start date");
+        endDate = Player.inputEndDateAfterStartDate(sc, "New End Date (yyyy-MM-dd): ", startDate);
+    }
+
+    private void validateEndDateAfterStartDate() {
+        LocalDate start = Player.parseDate(startDate);
+        LocalDate end = Player.parseDate(endDate);
+
+        if (start != null && end != null && !end.isAfter(start)) {
+            throw new IllegalArgumentException("End date must be after start date.");
+        }
     }
 
     public String getContractId() {
         return contractId;
     }
 
+    public void setContractId(String contractId) {
+        if (!Player.isNumeric(contractId)) {
+            throw new IllegalArgumentException("Contract ID must contain numbers only.");
+        }
+        this.contractId = contractId.trim();
+    }
+
     public String getPlayerId() {
         return playerId;
+    }
+
+    public void setPlayerId(String playerId) {
+        if (!Player.isNumeric(playerId)) {
+            throw new IllegalArgumentException("Player ID must contain numbers only.");
+        }
+        this.playerId = playerId.trim();
     }
 
     public String getPlayerType() {
@@ -40,7 +83,14 @@ public class Contract {
     }
 
     public void setPlayerType(String playerType) {
-        this.playerType = playerType;
+        if (!Player.isValidPlayerType(playerType)) {
+            throw new IllegalArgumentException("Player type must be Star or Regular.");
+        }
+        if (playerType.equalsIgnoreCase("star")) {
+            this.playerType = "Star";
+        } else {
+            this.playerType = "Regular";
+        }
     }
 
     public double getBaseSalary() {
@@ -48,6 +98,9 @@ public class Contract {
     }
 
     public void setBaseSalary(double baseSalary) {
+        if (baseSalary < 0) {
+            throw new IllegalArgumentException("Base salary cannot be negative.");
+        }
         this.baseSalary = baseSalary;
     }
 
@@ -56,7 +109,10 @@ public class Contract {
     }
 
     public void setStartDate(String startDate) {
-        this.startDate = startDate;
+        if (!Player.isValidDateString(startDate)) {
+            throw new IllegalArgumentException("Start date must use yyyy-MM-dd format and year must be from 2026 onwards.");
+        }
+        this.startDate = startDate.trim();
     }
 
     public String getEndDate() {
@@ -64,7 +120,11 @@ public class Contract {
     }
 
     public void setEndDate(String endDate) {
-        this.endDate = endDate;
+        if (!Player.isValidDateString(endDate)) {
+            throw new IllegalArgumentException("End date must use yyyy-MM-dd format and year must be from 2026 onwards.");
+        }
+        this.endDate = endDate.trim();
+        validateEndDateAfterStartDate();
     }
 
     public String getStatus() {
@@ -72,11 +132,10 @@ public class Contract {
     }
 
     public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public boolean validateContract() {
-        return baseSalary > 0 && status != null && !status.isEmpty();
+        if (!Player.isValidStatus(status)) {
+            throw new IllegalArgumentException("Status must be active or inactive.");
+        }
+        this.status = status.trim().toLowerCase();
     }
 
     public void displayContractInfo() {
