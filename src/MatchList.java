@@ -19,7 +19,7 @@ public class MatchList {
             System.out.println("4. Update match");
             System.out.println("5. Delete match");
             System.out.println("6. Exit match management");
-            choice = Player.inputMenuChoice(sc, "Choose option: ", 1, 6);
+            choice = inputMenuChoice(sc, "Choose option: ");
 
             switch (choice) {
                 case 1:
@@ -35,27 +35,62 @@ public class MatchList {
 
                 case 3:
                     System.out.println("\n===== SEARCH MATCH =====");
-                    String searchId = Player.inputNumericString(sc, "Enter Match ID to search: ", "Match ID");
+                    String searchId = inputNumericString(sc, "Enter Match ID to search: ");
                     displayMatchById(searchId);
                     break;
 
                 case 4:
                     System.out.println("\n===== UPDATE MATCH =====");
-                    String updateId = Player.inputNumericString(sc, "Enter Match ID to update: ", "Match ID");
+                    String updateId = inputNumericString(sc, "Enter Match ID to update: ");
                     updateMatch(updateId, sc);
                     break;
 
                 case 5:
                     System.out.println("\n===== DELETE MATCH =====");
-                    String deleteId = Player.inputNumericString(sc, "Enter Match ID to delete: ", "Match ID");
+                    String deleteId = inputNumericString(sc, "Enter Match ID to delete: ");
                     deleteMatch(deleteId);
                     break;
 
                 case 6:
                     System.out.println("Exit match management.");
                     break;
+
+                default:
+                    System.out.println("Invalid option. Please choose again.");
+                    break;
             }
         } while (choice != 6);
+    }
+
+    private int inputMenuChoice(Scanner sc, String message) {
+        int choice = -1;
+        boolean valid = false;
+
+        do {
+            try {
+                System.out.print(message);
+                choice = Integer.parseInt(sc.nextLine().trim());
+                valid = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+            }
+        } while (!valid);
+
+        return choice;
+    }
+
+    private String inputNumericString(Scanner sc, String message) {
+        String value;
+        do {
+            System.out.print(message);
+            value = sc.nextLine().trim();
+
+            if (!value.matches("\\d+")) {
+                System.out.println("Invalid input. ID must contain numbers only.");
+            }
+        } while (!value.matches("\\d+"));
+
+        return value;
     }
 
     public void addMatch(Match match) {

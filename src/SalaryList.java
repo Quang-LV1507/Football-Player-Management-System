@@ -19,7 +19,7 @@ public class SalaryList {
             System.out.println("4. Update salary");
             System.out.println("5. Delete salary");
             System.out.println("6. Exit salary management");
-            choice = Player.inputMenuChoice(sc, "Choose option: ", 1, 6);
+            choice = inputMenuChoice(sc, "Choose option: ");
 
             switch (choice) {
                 case 1:
@@ -33,36 +33,115 @@ public class SalaryList {
 
                 case 3:
                     System.out.println("\n===== SEARCH SALARY =====");
-                    String searchPlayerId = Player.inputNumericString(sc, "Enter Player ID to search salary: ", "Player ID");
-                    displaySalariesByPlayerId(searchPlayerId);
+                    String searchId = inputNumericString(sc, "Enter Player ID to search salary: ");
+                    displaySalariesByPlayerId(searchId);
                     break;
 
                 case 4:
                     System.out.println("\n===== UPDATE SALARY =====");
-                    String updatePlayerId = Player.inputNumericString(sc, "Enter Player ID: ", "Player ID");
-                    int updateMonth = Player.inputIntInRange(sc, "Enter Month (1-12): ", "Month", 1, 12);
-                    int updateYear = Player.inputYearFrom2026(sc, "Enter Year (from 2026 onwards): ");
+                    String updatePlayerId = inputNumericString(sc, "Enter Player ID: ");
+                    int updateMonth = inputMonth(sc, "Enter Month: ");
+                    int updateYear = inputYearFrom2026(sc, "Enter Year: ");
                     updateSalary(updatePlayerId, updateMonth, updateYear, sc, playerList);
                     break;
 
                 case 5:
                     System.out.println("\n===== DELETE SALARY =====");
-                    String deletePlayerId = Player.inputNumericString(sc, "Enter Player ID: ", "Player ID");
-                    int deleteMonth = Player.inputIntInRange(sc, "Enter Month (1-12): ", "Month", 1, 12);
-                    int deleteYear = Player.inputYearFrom2026(sc, "Enter Year (from 2026 onwards): ");
+                    String deletePlayerId = inputNumericString(sc, "Enter Player ID: ");
+                    int deleteMonth = inputMonth(sc, "Enter Month: ");
+                    int deleteYear = inputYearFrom2026(sc, "Enter Year: ");
                     deleteSalary(deletePlayerId, deleteMonth, deleteYear);
                     break;
 
                 case 6:
                     System.out.println("Exit salary management.");
                     break;
+
+                default:
+                    System.out.println("Invalid option. Please choose again.");
+                    break;
             }
         } while (choice != 6);
     }
 
+    private int inputMenuChoice(Scanner sc, String message) {
+        int choice = -1;
+        boolean valid = false;
+
+        do {
+            try {
+                System.out.print(message);
+                choice = Integer.parseInt(sc.nextLine().trim());
+                valid = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+            }
+        } while (!valid);
+
+        return choice;
+    }
+
+    private String inputNumericString(Scanner sc, String message) {
+        String value;
+        do {
+            System.out.print(message);
+            value = sc.nextLine().trim();
+
+            if (!value.matches("\\d+")) {
+                System.out.println("Invalid input. ID must contain numbers only.");
+            }
+        } while (!value.matches("\\d+"));
+
+        return value;
+    }
+
+    private int inputMonth(Scanner sc, String message) {
+        int number = 0;
+        boolean valid = false;
+
+        do {
+            try {
+                System.out.print(message);
+                number = Integer.parseInt(sc.nextLine().trim());
+
+                if (number >= 1 && number <= 12) {
+                    valid = true;
+                } else {
+                    System.out.println("Invalid month. Month must be from 1 to 12.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid integer number.");
+            }
+        } while (!valid);
+
+        return number;
+    }
+
+    private int inputYearFrom2026(Scanner sc, String message) {
+        int number = 0;
+        boolean valid = false;
+
+        do {
+            try {
+                System.out.print(message);
+                number = Integer.parseInt(sc.nextLine().trim());
+
+                if (number >= 2026) {
+                    valid = true;
+                } else {
+                    System.out.println("Invalid year. Year must be from 2026 onwards.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid integer number.");
+            }
+        } while (!valid);
+
+        return number;
+    }
+
     private void addSalaryByPlayer(Scanner sc, PlayerList playerList) {
         System.out.println("\n===== ADD SALARY =====");
-        String playerId = Player.inputNumericString(sc, "Enter Player ID for this salary: ", "Player ID");
+        String playerId = inputNumericString(sc, "Enter Player ID for this salary: ");
 
         Player player = playerList.searchPlayerById(playerId);
 
@@ -74,8 +153,8 @@ public class SalaryList {
         Salary salary = new Salary();
         salary.inputSalaryInfo(sc, player);
 
-        if (searchSalary(salary.getPlayerId(), salary.getMonth(), salary.getYear()) != null) {
-            System.out.println("Salary for this player, month and year already exists.");
+        if (searchSalary(player.getPlayerId(), salary.getMonth(), salary.getYear()) != null) {
+            System.out.println("Salary for this player/month/year already exists. Cannot add duplicate salary.");
             return;
         }
 

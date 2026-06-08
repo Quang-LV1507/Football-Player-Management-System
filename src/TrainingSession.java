@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class TrainingSession {
@@ -20,18 +22,77 @@ public class TrainingSession {
     public void inputTrainingSessionInfo(Scanner sc) {
         System.out.println("\n===== ENTER TRAINING SESSION INFORMATION =====");
 
-        trainingId = Player.inputNumericString(sc, "Training ID: ", "Training ID");
-        trainingDate = Player.inputDateString(sc, "Training Date (yyyy-MM-dd): ", "Training date");
-        trainingLocation = Player.inputNotEmptyString(sc, "Training Location: ", "Training Location");
-        trainingTopic = Player.inputNotEmptyString(sc, "Training Topic: ", "Training Topic");
+        trainingId = inputNumericString(sc, "Training ID: ");
+        trainingDate = inputDateString(sc, "Training Date (yyyy-MM-dd): ");
+        trainingLocation = inputNotEmptyString(sc, "Training Location: ");
+        trainingTopic = inputNotEmptyString(sc, "Training Topic: ");
     }
 
     public void updateTrainingSessionInfo(Scanner sc) {
         System.out.println("\n===== UPDATE TRAINING SESSION INFORMATION =====");
 
-        trainingDate = Player.inputDateString(sc, "New Training Date (yyyy-MM-dd): ", "Training date");
-        trainingLocation = Player.inputNotEmptyString(sc, "New Training Location: ", "Training Location");
-        trainingTopic = Player.inputNotEmptyString(sc, "New Training Topic: ", "Training Topic");
+        trainingDate = inputDateString(sc, "New Training Date (yyyy-MM-dd): ");
+        trainingLocation = inputNotEmptyString(sc, "New Training Location: ");
+        trainingTopic = inputNotEmptyString(sc, "New Training Topic: ");
+    }
+
+    private String inputNumericString(Scanner sc, String message) {
+        String value;
+        do {
+            System.out.print(message);
+            value = sc.nextLine().trim();
+
+            if (!isNumeric(value)) {
+                System.out.println("Invalid input. ID must contain numbers only.");
+            }
+        } while (!isNumeric(value));
+
+        return value;
+    }
+
+    private String inputNotEmptyString(Scanner sc, String message) {
+        String value;
+        do {
+            System.out.print(message);
+            value = sc.nextLine().trim();
+
+            if (value.isEmpty()) {
+                System.out.println("Invalid input. This field cannot be empty.");
+            }
+        } while (value.isEmpty());
+
+        return value;
+    }
+
+    private String inputDateString(Scanner sc, String message) {
+        String value;
+        do {
+            System.out.print(message);
+            value = sc.nextLine().trim();
+
+            if (!isValidDateString(value)) {
+                System.out.println("Invalid date. Use yyyy-MM-dd, real date, and year must be from 2026 onwards.");
+            }
+        } while (!isValidDateString(value));
+
+        return value;
+    }
+
+    private boolean isNumeric(String value) {
+        return value != null && value.matches("\\d+");
+    }
+
+    private boolean isValidDateString(String date) {
+        if (date == null || !date.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            return false;
+        }
+
+        try {
+            LocalDate parsedDate = LocalDate.parse(date);
+            return parsedDate.getYear() >= 2026;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
     }
 
     public String getTrainingId() {
@@ -39,7 +100,7 @@ public class TrainingSession {
     }
 
     public void setTrainingId(String trainingId) {
-        if (!Player.isNumeric(trainingId)) {
+        if (!isNumeric(trainingId)) {
             throw new IllegalArgumentException("Training ID must contain numbers only.");
         }
         this.trainingId = trainingId.trim();
@@ -50,7 +111,7 @@ public class TrainingSession {
     }
 
     public void setTrainingDate(String trainingDate) {
-        if (!Player.isValidDateString(trainingDate)) {
+        if (!isValidDateString(trainingDate)) {
             throw new IllegalArgumentException("Training date must use yyyy-MM-dd format and year must be from 2026 onwards.");
         }
         this.trainingDate = trainingDate.trim();

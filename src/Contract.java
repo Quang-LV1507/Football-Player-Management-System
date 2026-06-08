@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class Contract {
@@ -21,39 +22,110 @@ public class Contract {
         setBaseSalary(baseSalary);
         setStartDate(startDate);
         setEndDate(endDate);
-        validateEndDateAfterStartDate();
         setStatus(status);
     }
 
     public void inputContractInfo(Scanner sc, Player player) {
         System.out.println("\n===== ENTER CONTRACT INFORMATION =====");
 
-        contractId = Player.inputNumericString(sc, "Contract ID: ", "Contract ID");
+        contractId = inputNumericString(sc, "Contract ID: ");
         playerId = player.getPlayerId();
         playerType = player.getPlayerType();
         baseSalary = player.getBaseSalary();
         status = player.getStatus();
-        startDate = Player.inputDateString(sc, "Start Date (yyyy-MM-dd): ", "Start date");
-        endDate = Player.inputEndDateAfterStartDate(sc, "End Date (yyyy-MM-dd): ", startDate);
+
+        startDate = inputDateString(sc, "Start Date (yyyy-MM-dd): ");
+        endDate = inputEndDate(sc, "End Date (yyyy-MM-dd): ", startDate);
     }
 
-    public void updateContractInfo(Scanner sc, Player player) {
+    public void updateContractInfo(Scanner sc) {
         System.out.println("\n===== UPDATE CONTRACT INFORMATION =====");
 
-        playerType = player.getPlayerType();
-        baseSalary = player.getBaseSalary();
-        status = player.getStatus();
-        startDate = Player.inputDateString(sc, "New Start Date (yyyy-MM-dd): ", "Start date");
-        endDate = Player.inputEndDateAfterStartDate(sc, "New End Date (yyyy-MM-dd): ", startDate);
+        startDate = inputDateString(sc, "New Start Date (yyyy-MM-dd): ");
+        endDate = inputEndDate(sc, "New End Date (yyyy-MM-dd): ", startDate);
     }
 
-    private void validateEndDateAfterStartDate() {
-        LocalDate start = Player.parseDate(startDate);
-        LocalDate end = Player.parseDate(endDate);
+    private String inputNumericString(Scanner sc, String message) {
+        String value;
+        do {
+            System.out.print(message);
+            value = sc.nextLine().trim();
 
-        if (start != null && end != null && !end.isAfter(start)) {
-            throw new IllegalArgumentException("End date must be after start date.");
+            if (!isNumeric(value)) {
+                System.out.println("Invalid input. ID must contain numbers only.");
+            }
+        } while (!isNumeric(value));
+
+        return value;
+    }
+
+    private String inputDateString(Scanner sc, String message) {
+        String value;
+        do {
+            System.out.print(message);
+            value = sc.nextLine().trim();
+
+            if (!isValidDateString(value)) {
+                System.out.println("Invalid date. Use yyyy-MM-dd, real date, and year must be from 2026 onwards.");
+            }
+        } while (!isValidDateString(value));
+
+        return value;
+    }
+
+    private String inputEndDate(Scanner sc, String message, String startDate) {
+        String value;
+        do {
+            System.out.print(message);
+            value = sc.nextLine().trim();
+
+            if (!isValidDateString(value)) {
+                System.out.println("Invalid date. Use yyyy-MM-dd, real date, and year must be from 2026 onwards.");
+            } else if (!isEndDateAfterStartDate(startDate, value)) {
+                System.out.println("Invalid end date. End date must be after start date.");
+            }
+        } while (!isValidDateString(value) || !isEndDateAfterStartDate(startDate, value));
+
+        return value;
+    }
+
+    private boolean isNumeric(String value) {
+        return value != null && value.matches("\\d+");
+    }
+
+    private boolean isValidDateString(String date) {
+        if (date == null || !date.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            return false;
         }
+
+        try {
+            LocalDate parsedDate = LocalDate.parse(date);
+            return parsedDate.getYear() >= 2026;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
+
+    private boolean isEndDateAfterStartDate(String startDate, String endDate) {
+        try {
+            LocalDate start = LocalDate.parse(startDate);
+            LocalDate end = LocalDate.parse(endDate);
+            return end.isAfter(start);
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
+
+    private boolean isValidPlayerType(String playerType) {
+        return playerType != null
+                && (playerType.equalsIgnoreCase("Star")
+                || playerType.equalsIgnoreCase("Regular"));
+    }
+
+    private boolean isValidStatus(String status) {
+        return status != null
+                && (status.equalsIgnoreCase("active")
+                || status.equalsIgnoreCase("inactive"));
     }
 
     public String getContractId() {
@@ -61,7 +133,7 @@ public class Contract {
     }
 
     public void setContractId(String contractId) {
-        if (!Player.isNumeric(contractId)) {
+        if (!isNumeric(contractId)) {
             throw new IllegalArgumentException("Contract ID must contain numbers only.");
         }
         this.contractId = contractId.trim();
@@ -72,7 +144,7 @@ public class Contract {
     }
 
     public void setPlayerId(String playerId) {
-        if (!Player.isNumeric(playerId)) {
+        if (!isNumeric(playerId)) {
             throw new IllegalArgumentException("Player ID must contain numbers only.");
         }
         this.playerId = playerId.trim();
@@ -83,9 +155,10 @@ public class Contract {
     }
 
     public void setPlayerType(String playerType) {
-        if (!Player.isValidPlayerType(playerType)) {
+        if (!isValidPlayerType(playerType)) {
             throw new IllegalArgumentException("Player type must be Star or Regular.");
         }
+
         if (playerType.equalsIgnoreCase("star")) {
             this.playerType = "Star";
         } else {
@@ -109,7 +182,7 @@ public class Contract {
     }
 
     public void setStartDate(String startDate) {
-        if (!Player.isValidDateString(startDate)) {
+        if (!isValidDateString(startDate)) {
             throw new IllegalArgumentException("Start date must use yyyy-MM-dd format and year must be from 2026 onwards.");
         }
         this.startDate = startDate.trim();
@@ -120,11 +193,15 @@ public class Contract {
     }
 
     public void setEndDate(String endDate) {
-        if (!Player.isValidDateString(endDate)) {
+        if (!isValidDateString(endDate)) {
             throw new IllegalArgumentException("End date must use yyyy-MM-dd format and year must be from 2026 onwards.");
         }
+
+        if (startDate != null && !isEndDateAfterStartDate(startDate, endDate)) {
+            throw new IllegalArgumentException("End date must be after start date.");
+        }
+
         this.endDate = endDate.trim();
-        validateEndDateAfterStartDate();
     }
 
     public String getStatus() {
@@ -132,7 +209,7 @@ public class Contract {
     }
 
     public void setStatus(String status) {
-        if (!Player.isValidStatus(status)) {
+        if (!isValidStatus(status)) {
             throw new IllegalArgumentException("Status must be active or inactive.");
         }
         this.status = status.trim().toLowerCase();

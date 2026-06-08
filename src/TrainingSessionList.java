@@ -19,13 +19,13 @@ public class TrainingSessionList {
             System.out.println("4. Update training session");
             System.out.println("5. Delete training session");
             System.out.println("6. Exit training session management");
-            choice = Player.inputMenuChoice(sc, "Choose option: ", 1, 6);
+            choice = inputMenuChoice(sc, "Choose option: ");
 
             switch (choice) {
                 case 1:
-                    TrainingSession training = new TrainingSession();
-                    training.inputTrainingSessionInfo(sc);
-                    addTrainingSession(training);
+                    TrainingSession trainingSession = new TrainingSession();
+                    trainingSession.inputTrainingSessionInfo(sc);
+                    addTrainingSession(trainingSession);
                     break;
 
                 case 2:
@@ -35,27 +35,62 @@ public class TrainingSessionList {
 
                 case 3:
                     System.out.println("\n===== SEARCH TRAINING SESSION =====");
-                    String searchId = Player.inputNumericString(sc, "Enter Training ID to search: ", "Training ID");
+                    String searchId = inputNumericString(sc, "Enter Training ID to search: ");
                     displayTrainingSessionById(searchId);
                     break;
 
                 case 4:
                     System.out.println("\n===== UPDATE TRAINING SESSION =====");
-                    String updateId = Player.inputNumericString(sc, "Enter Training ID to update: ", "Training ID");
+                    String updateId = inputNumericString(sc, "Enter Training ID to update: ");
                     updateTrainingSession(updateId, sc);
                     break;
 
                 case 5:
                     System.out.println("\n===== DELETE TRAINING SESSION =====");
-                    String deleteId = Player.inputNumericString(sc, "Enter Training ID to delete: ", "Training ID");
+                    String deleteId = inputNumericString(sc, "Enter Training ID to delete: ");
                     deleteTrainingSession(deleteId);
                     break;
 
                 case 6:
                     System.out.println("Exit training session management.");
                     break;
+
+                default:
+                    System.out.println("Invalid option. Please choose again.");
+                    break;
             }
         } while (choice != 6);
+    }
+
+    private int inputMenuChoice(Scanner sc, String message) {
+        int choice = -1;
+        boolean valid = false;
+
+        do {
+            try {
+                System.out.print(message);
+                choice = Integer.parseInt(sc.nextLine().trim());
+                valid = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+            }
+        } while (!valid);
+
+        return choice;
+    }
+
+    private String inputNumericString(Scanner sc, String message) {
+        String value;
+        do {
+            System.out.print(message);
+            value = sc.nextLine().trim();
+
+            if (!value.matches("\\d+")) {
+                System.out.println("Invalid input. ID must contain numbers only.");
+            }
+        } while (!value.matches("\\d+"));
+
+        return value;
     }
 
     public void addTrainingSession(TrainingSession trainingSession) {

@@ -25,10 +25,10 @@ public class Salary {
         System.out.println("\n===== ENTER SALARY INFORMATION =====");
 
         playerId = player.getPlayerId();
-        month = Player.inputIntInRange(sc, "Month (1-12): ", "Month", 1, 12);
-        year = Player.inputYearFrom2026(sc, "Year (from 2026 onwards): ");
         baseSalary = player.getBaseSalary();
-        performanceBonus = Player.inputNonNegativeDouble(sc, "Performance Bonus: ", "Performance Bonus");
+        month = inputMonth(sc, "Month: ");
+        year = inputYearFrom2026(sc, "Year: ");
+        performanceBonus = inputNonNegativeDouble(sc, "Performance Bonus: ");
         calculateTotalSalary();
     }
 
@@ -36,8 +36,78 @@ public class Salary {
         System.out.println("\n===== UPDATE SALARY INFORMATION =====");
 
         baseSalary = player.getBaseSalary();
-        performanceBonus = Player.inputNonNegativeDouble(sc, "New Performance Bonus: ", "Performance Bonus");
+        performanceBonus = inputNonNegativeDouble(sc, "New Performance Bonus: ");
         calculateTotalSalary();
+    }
+
+    private int inputMonth(Scanner sc, String message) {
+        int number = 0;
+        boolean valid = false;
+
+        do {
+            try {
+                System.out.print(message);
+                number = Integer.parseInt(sc.nextLine().trim());
+
+                if (number >= 1 && number <= 12) {
+                    valid = true;
+                } else {
+                    System.out.println("Invalid month. Month must be from 1 to 12.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid integer number.");
+            }
+        } while (!valid);
+
+        return number;
+    }
+
+    private int inputYearFrom2026(Scanner sc, String message) {
+        int number = 0;
+        boolean valid = false;
+
+        do {
+            try {
+                System.out.print(message);
+                number = Integer.parseInt(sc.nextLine().trim());
+
+                if (number >= 2026) {
+                    valid = true;
+                } else {
+                    System.out.println("Invalid year. Year must be from 2026 onwards.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid integer number.");
+            }
+        } while (!valid);
+
+        return number;
+    }
+
+    private double inputNonNegativeDouble(Scanner sc, String message) {
+        double number = 0;
+        boolean valid = false;
+
+        do {
+            try {
+                System.out.print(message);
+                number = Double.parseDouble(sc.nextLine().trim());
+
+                if (number >= 0) {
+                    valid = true;
+                } else {
+                    System.out.println("Invalid input. Number cannot be negative.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+            }
+        } while (!valid);
+
+        return number;
+    }
+
+    private boolean isNumeric(String value) {
+        return value != null && value.matches("\\d+");
     }
 
     private void calculateTotalSalary() {
@@ -49,7 +119,7 @@ public class Salary {
     }
 
     public void setPlayerId(String playerId) {
-        if (!Player.isNumeric(playerId)) {
+        if (!isNumeric(playerId)) {
             throw new IllegalArgumentException("Player ID must contain numbers only.");
         }
         this.playerId = playerId.trim();

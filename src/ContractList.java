@@ -19,7 +19,7 @@ public class ContractList {
             System.out.println("4. Update contract");
             System.out.println("5. Delete contract");
             System.out.println("6. Exit contract management");
-            choice = Player.inputMenuChoice(sc, "Choose option: ", 1, 6);
+            choice = inputMenuChoice(sc, "Choose option: ");
 
             switch (choice) {
                 case 1:
@@ -33,32 +33,67 @@ public class ContractList {
 
                 case 3:
                     System.out.println("\n===== SEARCH CONTRACT =====");
-                    String searchId = Player.inputNumericString(sc, "Enter Contract ID to search: ", "Contract ID");
+                    String searchId = inputNumericString(sc, "Enter Contract ID to search: ");
                     displayContractById(searchId);
                     break;
 
                 case 4:
                     System.out.println("\n===== UPDATE CONTRACT =====");
-                    String updateId = Player.inputNumericString(sc, "Enter Contract ID to update: ", "Contract ID");
-                    updateContract(updateId, sc, playerList);
+                    String updateId = inputNumericString(sc, "Enter Contract ID to update: ");
+                    updateContract(updateId, sc);
                     break;
 
                 case 5:
                     System.out.println("\n===== DELETE CONTRACT =====");
-                    String deleteId = Player.inputNumericString(sc, "Enter Contract ID to delete: ", "Contract ID");
+                    String deleteId = inputNumericString(sc, "Enter Contract ID to delete: ");
                     deleteContract(deleteId);
                     break;
 
                 case 6:
                     System.out.println("Exit contract management.");
                     break;
+
+                default:
+                    System.out.println("Invalid option. Please choose again.");
+                    break;
             }
         } while (choice != 6);
     }
 
+    private int inputMenuChoice(Scanner sc, String message) {
+        int choice = -1;
+        boolean valid = false;
+
+        do {
+            try {
+                System.out.print(message);
+                choice = Integer.parseInt(sc.nextLine().trim());
+                valid = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+            }
+        } while (!valid);
+
+        return choice;
+    }
+
+    private String inputNumericString(Scanner sc, String message) {
+        String value;
+        do {
+            System.out.print(message);
+            value = sc.nextLine().trim();
+
+            if (!value.matches("\\d+")) {
+                System.out.println("Invalid input. ID must contain numbers only.");
+            }
+        } while (!value.matches("\\d+"));
+
+        return value;
+    }
+
     private void addContractByPlayer(Scanner sc, PlayerList playerList) {
         System.out.println("\n===== ADD CONTRACT =====");
-        String playerId = Player.inputNumericString(sc, "Enter Player ID for this contract: ", "Player ID");
+        String playerId = inputNumericString(sc, "Enter Player ID for this contract: ");
 
         Player player = playerList.searchPlayerById(playerId);
 
@@ -69,10 +104,7 @@ public class ContractList {
 
         Contract contract = new Contract();
         contract.inputContractInfo(sc, player);
-        addContract(contract);
-    }
 
-    public void addContract(Contract contract) {
         if (searchContractById(contract.getContractId()) != null) {
             System.out.println("Contract ID already exists. Cannot add duplicate contract.");
             return;
@@ -101,23 +133,15 @@ public class ContractList {
         }
     }
 
-    public void updateContract(String contractId, Scanner sc, PlayerList playerList) {
+    public void updateContract(String contractId, Scanner sc) {
         Contract contract = searchContractById(contractId);
 
-        if (contract == null) {
+        if (contract != null) {
+            contract.updateContractInfo(sc);
+            System.out.println("Contract updated successfully.");
+        } else {
             System.out.println("Contract not found.");
-            return;
         }
-
-        Player player = playerList.searchPlayerById(contract.getPlayerId());
-
-        if (player == null) {
-            System.out.println("Related player not found. Cannot update contract.");
-            return;
-        }
-
-        contract.updateContractInfo(sc, player);
-        System.out.println("Contract updated successfully.");
     }
 
     public void deleteContract(String contractId) {
