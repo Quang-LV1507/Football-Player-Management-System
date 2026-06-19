@@ -1,16 +1,16 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
+
 public class ContractList {
-    private ArrayList<Contract> contracts;
+    private ArrayList<Contract> contractCollection;
 
     public ContractList() {
-        contracts = new ArrayList<>();
+        contractCollection = new ArrayList<>();
     }
 
     public void manageContracts(Scanner sc, PlayerList playerList) {
-        int choice;
-
+        int selectedFunction;
         do {
             System.out.println("\n===== CONTRACT MANAGEMENT =====");
             System.out.println("1. Add contract");
@@ -18,152 +18,122 @@ public class ContractList {
             System.out.println("3. Search contract by ID");
             System.out.println("4. Update contract");
             System.out.println("5. Delete contract");
-            System.out.println("6. Exit contract management");
-            choice = inputMenuChoice(sc, "Choose option: ");
+            System.out.println("6. Back to main menu");
+            selectedFunction = readMenuNumber(sc);
 
-            switch (choice) {
+            switch (selectedFunction) {
                 case 1:
-                    addContractByPlayer(sc, playerList);
+                    addNewContract(sc, playerList);
                     break;
-
                 case 2:
-                    System.out.println("\n===== ALL CONTRACTS =====");
-                    displayAllContracts();
+                    displayContractList();
                     break;
-
                 case 3:
-                    System.out.println("\n===== SEARCH CONTRACT =====");
-                    String searchId = inputNumericString(sc, "Enter Contract ID to search: ");
-                    displayContractById(searchId);
+                    searchContractById(sc);
                     break;
-
                 case 4:
-                    System.out.println("\n===== UPDATE CONTRACT =====");
-                    String updateId = inputNumericString(sc, "Enter Contract ID to update: ");
-                    updateContract(updateId, sc);
+                    updateContractById(sc);
                     break;
-
                 case 5:
-                    System.out.println("\n===== DELETE CONTRACT =====");
-                    String deleteId = inputNumericString(sc, "Enter Contract ID to delete: ");
-                    deleteContract(deleteId);
+                    deleteContractById(sc);
                     break;
-
                 case 6:
-                    System.out.println("Exit contract management.");
-                    break;
-
-                default:
-                    System.out.println("Invalid option. Please choose again.");
+                    System.out.println("Back to main menu.");
                     break;
             }
-        } while (choice != 6);
+        } while (selectedFunction != 6);
     }
 
-    private int inputMenuChoice(Scanner sc, String message) {
-        int choice = -1;
-        boolean valid = false;
-
-        do {
-            try {
-                System.out.print(message);
-                choice = Integer.parseInt(sc.nextLine().trim());
-                valid = true;
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-            }
-        } while (!valid);
-
-        return choice;
-    }
-
-    private String inputNumericString(Scanner sc, String message) {
-        String value;
-        do {
-            System.out.print(message);
-            value = sc.nextLine().trim();
-
-            if (!value.matches("\\d+")) {
-                System.out.println("Invalid input. ID must contain numbers only.");
-            }
-        } while (!value.matches("\\d+"));
-
-        return value;
-    }
-
-    private void addContractByPlayer(Scanner sc, PlayerList playerList) {
-        System.out.println("\n===== ADD CONTRACT =====");
-        String playerId = inputNumericString(sc, "Enter Player ID for this contract: ");
-
-        Player player = playerList.searchPlayerById(playerId);
-
-        if (player == null) {
-            System.out.println("Player not found. Please add player first.");
-            return;
-        }
-
+    private void addNewContract(Scanner sc, PlayerList playerList) {
         Contract contract = new Contract();
-        contract.inputContractInfo(sc, player);
+        contract.inputContractInformation(sc);
 
-        if (searchContractById(contract.getContractId()) != null) {
-            System.out.println("Contract ID already exists. Cannot add duplicate contract.");
+        if (findContract(contract.getContractId()) != null) {
+            System.out.println("Contract ID already exists.");
             return;
         }
 
-        contracts.add(contract);
+        if (playerList.findPlayerById(contract.getPlayerId()) == null) {
+            System.out.println("Player ID does not exist. Please add player first.");
+            return;
+        }
+
+        contractCollection.add(contract);
         System.out.println("Contract added successfully.");
     }
 
-    public Contract searchContractById(String contractId) {
-        for (Contract contract : contracts) {
-            if (contract.getContractId().equalsIgnoreCase(contractId.trim())) {
+    private void displayContractList() {
+        if (contractCollection.isEmpty()) {
+            System.out.println("No contract data available.");
+            return;
+        }
+
+        for (int i = 0; i < contractCollection.size(); i++) {
+            System.out.println("\n--- Contract " + (i + 1) + " ---");
+            contractCollection.get(i).displayContractInformation();
+        }
+    }
+
+    private void searchContractById(Scanner sc) {
+        System.out.print("Enter Contract ID to search: ");
+        String searchId = sc.nextLine().trim();
+
+        Contract contract = findContract(searchId);
+        if (contract == null) {
+            System.out.println("Contract not found.");
+        } else {
+            contract.displayContractInformation();
+        }
+    }
+
+    private void updateContractById(Scanner sc) {
+        System.out.print("Enter Contract ID to update: ");
+        String updateId = sc.nextLine().trim();
+
+        Contract contract = findContract(updateId);
+        if (contract == null) {
+            System.out.println("Contract not found.");
+            return;
+        }
+
+        contract.updateContractInformation(sc);
+        System.out.println("Contract updated successfully.");
+    }
+
+    private void deleteContractById(Scanner sc) {
+        System.out.print("Enter Contract ID to delete: ");
+        String deleteId = sc.nextLine().trim();
+
+        Contract contract = findContract(deleteId);
+        if (contract == null) {
+            System.out.println("Contract not found.");
+        } else {
+            contractCollection.remove(contract);
+            System.out.println("Contract deleted successfully.");
+        }
+    }
+
+    private Contract findContract(String contractId) {
+        for (Contract contract : contractCollection) {
+            if (contract.getContractId().equals(contractId)) {
                 return contract;
             }
         }
         return null;
     }
 
-    public void displayContractById(String contractId) {
-        Contract contract = searchContractById(contractId);
-
-        if (contract != null) {
-            contract.displayContractInfo();
-        } else {
-            System.out.println("Contract not found.");
-        }
-    }
-
-    public void updateContract(String contractId, Scanner sc) {
-        Contract contract = searchContractById(contractId);
-
-        if (contract != null) {
-            contract.updateContractInfo(sc);
-            System.out.println("Contract updated successfully.");
-        } else {
-            System.out.println("Contract not found.");
-        }
-    }
-
-    public void deleteContract(String contractId) {
-        Contract contract = searchContractById(contractId);
-
-        if (contract != null) {
-            contracts.remove(contract);
-            System.out.println("Contract deleted successfully.");
-        } else {
-            System.out.println("Contract not found.");
-        }
-    }
-
-    public void displayAllContracts() {
-        if (contracts.isEmpty()) {
-            System.out.println("No contracts available.");
-            return;
-        }
-
-        for (Contract contract : contracts) {
-            contract.displayContractInfo();
-            System.out.println("-----------------------------");
+    private int readMenuNumber(Scanner sc) {
+        while (true) {
+            try {
+                System.out.print("Choose option: ");
+                int number = Integer.parseInt(sc.nextLine().trim());
+                if (number >= 1 && number <= 6) {
+                    return number;
+                }
+            } catch (NumberFormatException e) {
+                // handled by the message below
+            }
+            System.out.println("Please choose a valid option from 1 to 6.");
         }
     }
 }

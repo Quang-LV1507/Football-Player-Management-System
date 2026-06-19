@@ -1,128 +1,101 @@
 import java.util.Scanner;
 
-public class Salary {
+public class Salary extends ClubRecord {
     private String playerId;
     private int month;
     private int year;
-    private double baseSalary;
+    private double playerMonthlySalary;
     private double performanceBonus;
     private double totalSalary;
 
     public Salary() {
+        super();
     }
 
-    public Salary(String playerId, int month, int year,
-                  double baseSalary, double performanceBonus) {
-        setPlayerId(playerId);
-        setMonth(month);
-        setYear(year);
-        setBaseSalary(baseSalary);
-        setPerformanceBonus(performanceBonus);
+    public Salary(String salaryId, String playerId, int month, int year,
+                  double playerMonthlySalary, double performanceBonus) {
+        super(salaryId);
+        this.playerId = playerId;
+        this.month = month;
+        this.year = year;
+        this.playerMonthlySalary = playerMonthlySalary;
+        this.performanceBonus = performanceBonus;
         calculateTotalSalary();
     }
 
-    public void inputSalaryInfo(Scanner sc, Player player) {
+    public void inputSalaryInformation(Scanner sc) {
         System.out.println("\n===== ENTER SALARY INFORMATION =====");
-
-        playerId = player.getPlayerId();
-        baseSalary = player.getBaseSalary();
-        month = inputMonth(sc, "Month: ");
-        year = inputYearFrom2026(sc, "Year: ");
+        setId(inputNumericId(sc, "Salary ID: "));
+        playerId = inputNumericId(sc, "Player ID: ");
+        month = inputMonth(sc, "Month (1-12): ");
+        year = inputYear(sc, "Year (from 2026): ");
         performanceBonus = inputNonNegativeDouble(sc, "Performance Bonus: ");
         calculateTotalSalary();
     }
 
-    public void updateSalaryInfo(Scanner sc, Player player) {
+    public void updateSalaryInformation(Scanner sc) {
         System.out.println("\n===== UPDATE SALARY INFORMATION =====");
-
-        baseSalary = player.getBaseSalary();
+        month = inputMonth(sc, "New Month (1-12): ");
+        year = inputYear(sc, "New Year (from 2026): ");
         performanceBonus = inputNonNegativeDouble(sc, "New Performance Bonus: ");
         calculateTotalSalary();
     }
 
     private int inputMonth(Scanner sc, String message) {
-        int number = 0;
-        boolean valid = false;
-
-        do {
+        while (true) {
             try {
                 System.out.print(message);
-                number = Integer.parseInt(sc.nextLine().trim());
-
-                if (number >= 1 && number <= 12) {
-                    valid = true;
-                } else {
-                    System.out.println("Invalid month. Month must be from 1 to 12.");
+                int value = Integer.parseInt(sc.nextLine().trim());
+                if (value >= 1 && value <= 12) {
+                    return value;
                 }
+                System.out.println("Month must be from 1 to 12.");
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid integer number.");
+                System.out.println("Please enter a valid month number.");
             }
-        } while (!valid);
-
-        return number;
+        }
     }
 
-    private int inputYearFrom2026(Scanner sc, String message) {
-        int number = 0;
-        boolean valid = false;
-
-        do {
+    private int inputYear(Scanner sc, String message) {
+        while (true) {
             try {
                 System.out.print(message);
-                number = Integer.parseInt(sc.nextLine().trim());
-
-                if (number >= 2026) {
-                    valid = true;
-                } else {
-                    System.out.println("Invalid year. Year must be from 2026 onwards.");
+                int value = Integer.parseInt(sc.nextLine().trim());
+                if (value >= 2026) {
+                    return value;
                 }
+                System.out.println("Year must be from 2026 onward.");
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid integer number.");
+                System.out.println("Please enter a valid year number.");
             }
-        } while (!valid);
-
-        return number;
+        }
     }
 
     private double inputNonNegativeDouble(Scanner sc, String message) {
-        double number = 0;
-        boolean valid = false;
-
-        do {
+        while (true) {
             try {
                 System.out.print(message);
-                number = Double.parseDouble(sc.nextLine().trim());
-
-                if (number >= 0) {
-                    valid = true;
-                } else {
-                    System.out.println("Invalid input. Number cannot be negative.");
+                double value = Double.parseDouble(sc.nextLine().trim());
+                if (value >= 0) {
+                    return value;
                 }
+                System.out.println("Value cannot be negative.");
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
+                System.out.println("Please enter a valid number.");
             }
-        } while (!valid);
-
-        return number;
-    }
-
-    private boolean isNumeric(String value) {
-        return value != null && value.matches("\\d+");
+        }
     }
 
     private void calculateTotalSalary() {
-        totalSalary = baseSalary + performanceBonus;
+        totalSalary = playerMonthlySalary + performanceBonus;
+    }
+
+    public String getSalaryId() {
+        return getId();
     }
 
     public String getPlayerId() {
         return playerId;
-    }
-
-    public void setPlayerId(String playerId) {
-        if (!isNumeric(playerId)) {
-            throw new IllegalArgumentException("Player ID must contain numbers only.");
-        }
-        this.playerId = playerId.trim();
     }
 
     public int getMonth() {
@@ -130,10 +103,9 @@ public class Salary {
     }
 
     public void setMonth(int month) {
-        if (month < 1 || month > 12) {
-            throw new IllegalArgumentException("Month must be from 1 to 12.");
+        if (month >= 1 && month <= 12) {
+            this.month = month;
         }
-        this.month = month;
     }
 
     public int getYear() {
@@ -141,22 +113,28 @@ public class Salary {
     }
 
     public void setYear(int year) {
-        if (year < 2026) {
-            throw new IllegalArgumentException("Year must be from 2026 onwards.");
+        if (year >= 2026) {
+            this.year = year;
         }
-        this.year = year;
     }
 
     public double getBaseSalary() {
-        return baseSalary;
+        return playerMonthlySalary;
     }
 
-    public void setBaseSalary(double baseSalary) {
-        if (baseSalary < 0) {
-            throw new IllegalArgumentException("Base salary cannot be negative.");
+    public void setBaseSalary(double playerMonthlySalary) {
+        setPlayerMonthlySalary(playerMonthlySalary);
+    }
+
+    public double getPlayerMonthlySalary() {
+        return playerMonthlySalary;
+    }
+
+    public void setPlayerMonthlySalary(double playerMonthlySalary) {
+        if (playerMonthlySalary >= 0) {
+            this.playerMonthlySalary = playerMonthlySalary;
+            calculateTotalSalary();
         }
-        this.baseSalary = baseSalary;
-        calculateTotalSalary();
     }
 
     public double getPerformanceBonus() {
@@ -164,23 +142,33 @@ public class Salary {
     }
 
     public void setPerformanceBonus(double performanceBonus) {
-        if (performanceBonus < 0) {
-            throw new IllegalArgumentException("Performance bonus cannot be negative.");
+        if (performanceBonus >= 0) {
+            this.performanceBonus = performanceBonus;
+            calculateTotalSalary();
         }
-        this.performanceBonus = performanceBonus;
-        calculateTotalSalary();
     }
 
     public double getTotalSalary() {
         return totalSalary;
     }
 
-    public void displaySalaryInfo() {
+    @Override
+    public String getEntityType() {
+        return "Salary Record";
+    }
+
+    @Override
+    public void displayInfo() {
+        System.out.println("Salary ID: " + getId());
         System.out.println("Player ID: " + playerId);
         System.out.println("Month: " + month);
         System.out.println("Year: " + year);
-        System.out.println("Base Salary: " + baseSalary);
+        System.out.println("Player Monthly Salary: " + playerMonthlySalary);
         System.out.println("Performance Bonus: " + performanceBonus);
         System.out.println("Total Salary: " + totalSalary);
+    }
+
+    public void displaySalaryInformation() {
+        displayInfo();
     }
 }

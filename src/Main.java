@@ -1,76 +1,85 @@
 import java.util.Scanner;
 
 public class Main {
+    private Scanner scanner;
+    private PlayerList playerList;
+    private TrainingSessionList trainingSessionList;
+    private MatchRecordList matchRecordList;
+    private ContractList contractList;
+    private SalaryList salaryList;
+
+    public Main() {
+        scanner = new Scanner(System.in);
+        playerList = new PlayerList();
+        trainingSessionList = new TrainingSessionList();
+        matchRecordList = new MatchRecordList();
+        contractList = new ContractList();
+        salaryList = new SalaryList();
+    }
 
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
+        Main program = new Main();
+        program.runProgram();
+    }
 
-        PlayerList playerList = new PlayerList();
-        TrainingSessionList trainingSessionList = new TrainingSessionList();
-        MatchList matchList = new MatchList();
-        ContractList contractList = new ContractList();
-        SalaryList salaryList = new SalaryList();
-
+    public void runProgram() {
         int choice;
 
         do {
-            System.out.println("\n========== FOOTBALL PLAYER MANAGEMENT SYSTEM ==========");
-            System.out.println("1. Player Management");
-            System.out.println("2. Training Session Management");
-            System.out.println("3. Match Management");
-            System.out.println("4. Contract Management");
-            System.out.println("5. Salary Management");
-            System.out.println("6. Exit Program");
-            choice = inputMenuChoice(sc, "Choose option: ");
+            showMainMenu();
+            choice = inputChoice("Choose option: ", 1, 7);
 
             switch (choice) {
                 case 1:
-                    playerList.managePlayers(sc);
+                    playerList.managePlayers(scanner);
                     break;
-
                 case 2:
-                    trainingSessionList.manageTrainingSessions(sc);
+                    trainingSessionList.manageTrainingSessions(scanner);
                     break;
-
                 case 3:
-                    matchList.manageMatches(sc);
+                    matchRecordList.manageMatchRecords(scanner);
                     break;
-
                 case 4:
-                    contractList.manageContracts(sc, playerList);
+                    contractList.manageContracts(scanner, playerList);
                     break;
-
                 case 5:
-                    salaryList.manageSalaries(sc, playerList);
+                    salaryList.manageSalaries(scanner, playerList);
                     break;
-
+                
                 case 6:
-                    System.out.println("Exit program.");
-                    break;
-
-                default:
-                    System.out.println("Invalid option. Please choose again.");
+                    System.out.println("Program ended.");
                     break;
             }
-        } while (choice != 6);
+        } while (choice != 7);
 
-        sc.close();
+        scanner.close();
     }
 
-    private static int inputMenuChoice(Scanner sc, String message) {
-        int choice = -1;
-        boolean valid = false;
+    private void showMainMenu() {
+        System.out.println("\n========== FOOTBALL PLAYER MANAGEMENT SYSTEM ==========");
+        System.out.println("1. Manage Players");
+        System.out.println("2. Manage Training Sessions");
+        System.out.println("3. Manage Match Records");
+        System.out.println("4. Manage Contracts");
+        System.out.println("5. Manage Salaries");
+        System.out.println("6. Show Polymorphism Demo");
+        System.out.println("7. Exit");
+    }
 
-        do {
+    private int inputChoice(String message, int min, int max) {
+        while (true) {
             try {
                 System.out.print(message);
-                choice = Integer.parseInt(sc.nextLine().trim());
-                valid = true;
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-            }
-        } while (!valid);
+                int number = Integer.parseInt(scanner.nextLine().trim());
 
-        return choice;
+                if (number >= min && number <= max) {
+                    return number;
+                }
+
+                System.out.println("Please choose from " + min + " to " + max + ".");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number. Please try again.");
+            }
+        }
     }
 }

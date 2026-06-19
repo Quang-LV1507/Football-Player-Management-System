@@ -10,149 +10,144 @@ public class PlayerList {
 
     public void managePlayers(Scanner sc) {
         int choice;
-
         do {
-            System.out.println("\n===== PLAYER MANAGEMENT =====");
-            System.out.println("1. Add player");
-            System.out.println("2. Display all players");
-            System.out.println("3. Search player by ID");
-            System.out.println("4. Update player");
-            System.out.println("5. Delete player");
-            System.out.println("6. Exit player management");
-            choice = inputMenuChoice(sc, "Choose option: ");
+            printPlayerMenu();
+            choice = readMenuChoice(sc);
 
             switch (choice) {
                 case 1:
-                    Player player = new Player();
-                    player.inputPlayerInfo(sc);
-                    addPlayer(player);
+                    addPlayer(sc);
                     break;
-
                 case 2:
-                    System.out.println("\n===== ALL PLAYERS =====");
                     displayAllPlayers();
                     break;
-
                 case 3:
-                    System.out.println("\n===== SEARCH PLAYER =====");
-                    String searchId = inputNumericString(sc, "Enter Player ID to search: ");
-                    displayPlayerById(searchId);
+                    searchPlayer(sc);
                     break;
-
                 case 4:
-                    System.out.println("\n===== UPDATE PLAYER =====");
-                    String updateId = inputNumericString(sc, "Enter Player ID to update: ");
-                    updatePlayer(updateId, sc);
+                    updatePlayer(sc);
                     break;
-
                 case 5:
-                    System.out.println("\n===== DELETE PLAYER =====");
-                    String deleteId = inputNumericString(sc, "Enter Player ID to delete: ");
-                    deletePlayer(deleteId);
+                    deletePlayer(sc);
                     break;
-
                 case 6:
-                    System.out.println("Exit player management.");
-                    break;
-
-                default:
-                    System.out.println("Invalid option. Please choose again.");
+                    System.out.println("Back to main menu.");
                     break;
             }
         } while (choice != 6);
     }
 
-    private int inputMenuChoice(Scanner sc, String message) {
-        int choice = -1;
-        boolean valid = false;
-
-        do {
-            try {
-                System.out.print(message);
-                choice = Integer.parseInt(sc.nextLine().trim());
-                valid = true;
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-            }
-        } while (!valid);
-
-        return choice;
+    private void printPlayerMenu() {
+        System.out.println("\n===== PLAYER MANAGEMENT =====");
+        System.out.println("1. Add player");
+        System.out.println("2. Display all players");
+        System.out.println("3. Search player by ID");
+        System.out.println("4. Update player");
+        System.out.println("5. Delete player");
+        System.out.println("6. Back to main menu");
     }
 
-    private String inputNumericString(Scanner sc, String message) {
-        String value;
-        do {
-            System.out.print(message);
-            value = sc.nextLine().trim();
+    private void addPlayer(Scanner sc) {
+        Player player = createPlayerByType(sc);
+        player.inputPlayerInfo(sc);
 
-            if (!value.matches("\\d+")) {
-                System.out.println("Invalid input. ID must contain numbers only.");
-            }
-        } while (!value.matches("\\d+"));
-
-        return value;
-    }
-
-    public void addPlayer(Player player) {
-        if (searchPlayerById(player.getPlayerId()) != null) {
-            System.out.println("Player ID already exists. Cannot add duplicate player.");
+        if (findPlayerById(player.getPlayerId()) != null) {
+            System.out.println("Player ID already exists.");
             return;
         }
 
         players.add(player);
-        System.out.println("Player added successfully.");
+        System.out.println(player.getPlayerType() + " player added successfully.");
     }
 
-    public Player searchPlayerById(String playerId) {
+    private Player createPlayerByType(Scanner sc) {
+        while (true) {
+            System.out.print("Player Type (Star/Regular): ");
+            String playerType = sc.nextLine().trim();
+
+            if (playerType.equalsIgnoreCase("Star")) {
+                return new StarPlayer();
+            }
+            if (playerType.equalsIgnoreCase("Regular")) {
+                return new RegularPlayer();
+            }
+            System.out.println("Player type must be Star or Regular.");
+        }
+    }
+
+    private void displayAllPlayers() {
+        if (players.isEmpty()) {
+            System.out.println("No player data available.");
+            return;
+        }
+
+        for (int i = 0; i < players.size(); i++) {
+            System.out.println("\n--- Player " + (i + 1) + " ---");
+            Player player = players.get(i);
+            player.displayInfo();
+        }
+    }
+
+    private void searchPlayer(Scanner sc) {
+        System.out.print("Enter Player ID to search: ");
+        String id = sc.nextLine().trim();
+
+        Player player = findPlayerById(id);
+        if (player == null) {
+            System.out.println("Player not found.");
+        } else {
+            player.displayInfo();
+        }
+    }
+
+    private void updatePlayer(Scanner sc) {
+        System.out.print("Enter Player ID to update: ");
+        String id = sc.nextLine().trim();
+
+        Player player = findPlayerById(id);
+        if (player == null) {
+            System.out.println("Player not found.");
+            return;
+        }
+
+        player.updatePlayerInfo(sc);
+        System.out.println("Player updated successfully.");
+    }
+
+    private void deletePlayer(Scanner sc) {
+        System.out.print("Enter Player ID to delete: ");
+        String id = sc.nextLine().trim();
+
+        Player player = findPlayerById(id);
+        if (player == null) {
+            System.out.println("Player not found.");
+        } else {
+            players.remove(player);
+            System.out.println("Player deleted successfully.");
+        }
+    }
+
+    public Player findPlayerById(String id) {
         for (Player player : players) {
-            if (player.getPlayerId().equalsIgnoreCase(playerId.trim())) {
+            if (player.getPlayerId().equals(id)) {
                 return player;
             }
         }
         return null;
     }
 
-    public void displayPlayerById(String playerId) {
-        Player player = searchPlayerById(playerId);
-
-        if (player != null) {
-            player.displayPlayerInfo();
-        } else {
-            System.out.println("Player not found.");
-        }
-    }
-
-    public void updatePlayer(String playerId, Scanner sc) {
-        Player player = searchPlayerById(playerId);
-
-        if (player != null) {
-            player.updatePlayerInfo(sc);
-            System.out.println("Player updated successfully.");
-        } else {
-            System.out.println("Player not found.");
-        }
-    }
-
-    public void deletePlayer(String playerId) {
-        Player player = searchPlayerById(playerId);
-
-        if (player != null) {
-            players.remove(player);
-            System.out.println("Player deleted successfully.");
-        } else {
-            System.out.println("Player not found.");
-        }
-    }
-
-    public void displayAllPlayers() {
-        if (players.isEmpty()) {
-            System.out.println("No players available.");
-            return;
-        }
-
-        for (Player player : players) {
-            player.displayPlayerInfo();
-            System.out.println("-----------------------------");
+    private int readMenuChoice(Scanner sc) {
+        while (true) {
+            try {
+                System.out.print("Choose option: ");
+                int choice = Integer.parseInt(sc.nextLine().trim());
+                if (choice >= 1 && choice <= 6) {
+                    return choice;
+                }
+                System.out.println("Please choose from 1 to 6.");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number. Please try again.");
+            }
         }
     }
 }

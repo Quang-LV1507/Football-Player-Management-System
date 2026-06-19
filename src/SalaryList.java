@@ -2,232 +2,149 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class SalaryList {
-    private ArrayList<Salary> salaries;
+    private ArrayList<Salary> salaryRecords;
 
     public SalaryList() {
-        salaries = new ArrayList<>();
+        salaryRecords = new ArrayList<>();
     }
 
     public void manageSalaries(Scanner sc, PlayerList playerList) {
-        int choice;
-
+        int selectedOption;
         do {
-            System.out.println("\n===== SALARY MANAGEMENT =====");
-            System.out.println("1. Add salary");
-            System.out.println("2. Display all salaries");
-            System.out.println("3. Search salary by Player ID");
-            System.out.println("4. Update salary");
-            System.out.println("5. Delete salary");
-            System.out.println("6. Exit salary management");
-            choice = inputMenuChoice(sc, "Choose option: ");
+            printSalaryMenu();
+            selectedOption = readSalaryMenuOption(sc);
 
-            switch (choice) {
+            switch (selectedOption) {
                 case 1:
-                    addSalaryByPlayer(sc, playerList);
+                    addNewSalaryRecord(sc, playerList);
                     break;
-
                 case 2:
-                    System.out.println("\n===== ALL SALARIES =====");
-                    displayAllSalaries();
+                    displayAllSalaryRecords();
                     break;
-
                 case 3:
-                    System.out.println("\n===== SEARCH SALARY =====");
-                    String searchId = inputNumericString(sc, "Enter Player ID to search salary: ");
-                    displaySalariesByPlayerId(searchId);
+                    searchSalaryRecord(sc);
                     break;
-
                 case 4:
-                    System.out.println("\n===== UPDATE SALARY =====");
-                    String updatePlayerId = inputNumericString(sc, "Enter Player ID: ");
-                    int updateMonth = inputMonth(sc, "Enter Month: ");
-                    int updateYear = inputYearFrom2026(sc, "Enter Year: ");
-                    updateSalary(updatePlayerId, updateMonth, updateYear, sc, playerList);
+                    updateSalaryRecord(sc, playerList);
                     break;
-
                 case 5:
-                    System.out.println("\n===== DELETE SALARY =====");
-                    String deletePlayerId = inputNumericString(sc, "Enter Player ID: ");
-                    int deleteMonth = inputMonth(sc, "Enter Month: ");
-                    int deleteYear = inputYearFrom2026(sc, "Enter Year: ");
-                    deleteSalary(deletePlayerId, deleteMonth, deleteYear);
+                    deleteSalaryRecord(sc);
                     break;
-
                 case 6:
-                    System.out.println("Exit salary management.");
-                    break;
-
-                default:
-                    System.out.println("Invalid option. Please choose again.");
+                    System.out.println("Back to main menu.");
                     break;
             }
-        } while (choice != 6);
+        } while (selectedOption != 6);
     }
 
-    private int inputMenuChoice(Scanner sc, String message) {
-        int choice = -1;
-        boolean valid = false;
-
-        do {
-            try {
-                System.out.print(message);
-                choice = Integer.parseInt(sc.nextLine().trim());
-                valid = true;
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-            }
-        } while (!valid);
-
-        return choice;
+    private void printSalaryMenu() {
+        System.out.println("\n===== SALARY MANAGEMENT =====");
+        System.out.println("1. Add salary record");
+        System.out.println("2. Display all salary records");
+        System.out.println("3. Search salary by ID");
+        System.out.println("4. Update salary record");
+        System.out.println("5. Delete salary record");
+        System.out.println("6. Back to main menu");
     }
 
-    private String inputNumericString(Scanner sc, String message) {
-        String value;
-        do {
-            System.out.print(message);
-            value = sc.nextLine().trim();
-
-            if (!value.matches("\\d+")) {
-                System.out.println("Invalid input. ID must contain numbers only.");
-            }
-        } while (!value.matches("\\d+"));
-
-        return value;
-    }
-
-    private int inputMonth(Scanner sc, String message) {
-        int number = 0;
-        boolean valid = false;
-
-        do {
-            try {
-                System.out.print(message);
-                number = Integer.parseInt(sc.nextLine().trim());
-
-                if (number >= 1 && number <= 12) {
-                    valid = true;
-                } else {
-                    System.out.println("Invalid month. Month must be from 1 to 12.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid integer number.");
-            }
-        } while (!valid);
-
-        return number;
-    }
-
-    private int inputYearFrom2026(Scanner sc, String message) {
-        int number = 0;
-        boolean valid = false;
-
-        do {
-            try {
-                System.out.print(message);
-                number = Integer.parseInt(sc.nextLine().trim());
-
-                if (number >= 2026) {
-                    valid = true;
-                } else {
-                    System.out.println("Invalid year. Year must be from 2026 onwards.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid integer number.");
-            }
-        } while (!valid);
-
-        return number;
-    }
-
-    private void addSalaryByPlayer(Scanner sc, PlayerList playerList) {
-        System.out.println("\n===== ADD SALARY =====");
-        String playerId = inputNumericString(sc, "Enter Player ID for this salary: ");
-
-        Player player = playerList.searchPlayerById(playerId);
-
-        if (player == null) {
-            System.out.println("Player not found. Please add player first.");
-            return;
-        }
-
+    private void addNewSalaryRecord(Scanner sc, PlayerList playerList) {
         Salary salary = new Salary();
-        salary.inputSalaryInfo(sc, player);
+        salary.inputSalaryInformation(sc);
 
-        if (searchSalary(player.getPlayerId(), salary.getMonth(), salary.getYear()) != null) {
-            System.out.println("Salary for this player/month/year already exists. Cannot add duplicate salary.");
+        if (findSalaryById(salary.getSalaryId()) != null) {
+            System.out.println("Salary ID already exists.");
             return;
         }
 
-        salaries.add(salary);
-        System.out.println("Salary added successfully.");
+        Player player = playerList.findPlayerById(salary.getPlayerId());
+        if (player == null) {
+            System.out.println("Player ID does not exist. Please add player first.");
+            return;
+        }
+
+        // Dynamic dispatch: StarPlayer and RegularPlayer calculate salary differently.
+        salary.setPlayerMonthlySalary(player.calculateMonthlySalary());
+        salaryRecords.add(salary);
+        System.out.println("Salary record added successfully.");
     }
 
-    public Salary searchSalary(String playerId, int month, int year) {
-        for (Salary salary : salaries) {
-            if (salary.getPlayerId().equalsIgnoreCase(playerId.trim())
-                    && salary.getMonth() == month
-                    && salary.getYear() == year) {
+    private void displayAllSalaryRecords() {
+        if (salaryRecords.isEmpty()) {
+            System.out.println("No salary data available.");
+            return;
+        }
+
+        for (int i = 0; i < salaryRecords.size(); i++) {
+            System.out.println("\n--- Salary Record " + (i + 1) + " ---");
+            salaryRecords.get(i).displayInfo();
+        }
+    }
+
+    private void searchSalaryRecord(Scanner sc) {
+        System.out.print("Enter Salary ID to search: ");
+        String searchId = sc.nextLine().trim();
+
+        Salary salary = findSalaryById(searchId);
+        if (salary == null) {
+            System.out.println("Salary record not found.");
+        } else {
+            salary.displayInfo();
+        }
+    }
+
+    private void updateSalaryRecord(Scanner sc, PlayerList playerList) {
+        System.out.print("Enter Salary ID to update: ");
+        String updateId = sc.nextLine().trim();
+
+        Salary salary = findSalaryById(updateId);
+        if (salary == null) {
+            System.out.println("Salary record not found.");
+            return;
+        }
+
+        Player player = playerList.findPlayerById(salary.getPlayerId());
+        if (player != null) {
+            salary.setPlayerMonthlySalary(player.calculateMonthlySalary());
+        }
+
+        salary.updateSalaryInformation(sc);
+        System.out.println("Salary record updated successfully.");
+    }
+
+    private void deleteSalaryRecord(Scanner sc) {
+        System.out.print("Enter Salary ID to delete: ");
+        String deleteId = sc.nextLine().trim();
+
+        Salary salary = findSalaryById(deleteId);
+        if (salary == null) {
+            System.out.println("Salary record not found.");
+        } else {
+            salaryRecords.remove(salary);
+            System.out.println("Salary record deleted successfully.");
+        }
+    }
+
+    private Salary findSalaryById(String salaryId) {
+        for (Salary salary : salaryRecords) {
+            if (salary.getSalaryId().equals(salaryId)) {
                 return salary;
             }
         }
         return null;
     }
 
-    public void displaySalariesByPlayerId(String playerId) {
-        boolean found = false;
-
-        for (Salary salary : salaries) {
-            if (salary.getPlayerId().equalsIgnoreCase(playerId.trim())) {
-                salary.displaySalaryInfo();
-                System.out.println("-----------------------------");
-                found = true;
+    private int readSalaryMenuOption(Scanner sc) {
+        while (true) {
+            try {
+                System.out.print("Choose option: ");
+                int option = Integer.parseInt(sc.nextLine().trim());
+                if (option >= 1 && option <= 6) {
+                    return option;
+                }
+            } catch (NumberFormatException e) {
+                // message shown below
             }
-        }
-
-        if (!found) {
-            System.out.println("No salary found for this player.");
-        }
-    }
-
-    public void updateSalary(String playerId, int month, int year, Scanner sc, PlayerList playerList) {
-        Salary salary = searchSalary(playerId, month, year);
-
-        if (salary == null) {
-            System.out.println("Salary not found.");
-            return;
-        }
-
-        Player player = playerList.searchPlayerById(playerId);
-
-        if (player == null) {
-            System.out.println("Related player not found. Cannot update salary.");
-            return;
-        }
-
-        salary.updateSalaryInfo(sc, player);
-        System.out.println("Salary updated successfully.");
-    }
-
-    public void deleteSalary(String playerId, int month, int year) {
-        Salary salary = searchSalary(playerId, month, year);
-
-        if (salary != null) {
-            salaries.remove(salary);
-            System.out.println("Salary deleted successfully.");
-        } else {
-            System.out.println("Salary not found.");
-        }
-    }
-
-    public void displayAllSalaries() {
-        if (salaries.isEmpty()) {
-            System.out.println("No salaries available.");
-            return;
-        }
-
-        for (Salary salary : salaries) {
-            salary.displaySalaryInfo();
-            System.out.println("-----------------------------");
+            System.out.println("Please choose a valid option from 1 to 6.");
         }
     }
 }

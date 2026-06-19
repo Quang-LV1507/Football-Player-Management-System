@@ -1,16 +1,16 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
+
 public class TrainingSessionList {
-    private ArrayList<TrainingSession> trainingSessions;
+    private ArrayList<TrainingSession> sessions;
 
     public TrainingSessionList() {
-        trainingSessions = new ArrayList<>();
+        sessions = new ArrayList<>();
     }
 
     public void manageTrainingSessions(Scanner sc) {
         int choice;
-
         do {
             System.out.println("\n===== TRAINING SESSION MANAGEMENT =====");
             System.out.println("1. Add training session");
@@ -18,141 +18,109 @@ public class TrainingSessionList {
             System.out.println("3. Search training session by ID");
             System.out.println("4. Update training session");
             System.out.println("5. Delete training session");
-            System.out.println("6. Exit training session management");
-            choice = inputMenuChoice(sc, "Choose option: ");
+            System.out.println("6. Back to main menu");
+            choice = menu(sc);
 
-            switch (choice) {
-                case 1:
-                    TrainingSession trainingSession = new TrainingSession();
-                    trainingSession.inputTrainingSessionInfo(sc);
-                    addTrainingSession(trainingSession);
-                    break;
-
-                case 2:
-                    System.out.println("\n===== ALL TRAINING SESSIONS =====");
-                    displayAllTrainingSessions();
-                    break;
-
-                case 3:
-                    System.out.println("\n===== SEARCH TRAINING SESSION =====");
-                    String searchId = inputNumericString(sc, "Enter Training ID to search: ");
-                    displayTrainingSessionById(searchId);
-                    break;
-
-                case 4:
-                    System.out.println("\n===== UPDATE TRAINING SESSION =====");
-                    String updateId = inputNumericString(sc, "Enter Training ID to update: ");
-                    updateTrainingSession(updateId, sc);
-                    break;
-
-                case 5:
-                    System.out.println("\n===== DELETE TRAINING SESSION =====");
-                    String deleteId = inputNumericString(sc, "Enter Training ID to delete: ");
-                    deleteTrainingSession(deleteId);
-                    break;
-
-                case 6:
-                    System.out.println("Exit training session management.");
-                    break;
-
-                default:
-                    System.out.println("Invalid option. Please choose again.");
-                    break;
+            if (choice == 1) {
+                add(sc);
+            } else if (choice == 2) {
+                display();
+            } else if (choice == 3) {
+                search(sc);
+            } else if (choice == 4) {
+                update(sc);
+            } else if (choice == 5) {
+                delete(sc);
+            } else {
+                System.out.println("Back to main menu.");
             }
         } while (choice != 6);
     }
 
-    private int inputMenuChoice(Scanner sc, String message) {
-        int choice = -1;
-        boolean valid = false;
+    private void add(Scanner sc) {
+        TrainingSession session = new TrainingSession();
+        session.input(sc);
 
-        do {
-            try {
-                System.out.print(message);
-                choice = Integer.parseInt(sc.nextLine().trim());
-                valid = true;
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-            }
-        } while (!valid);
-
-        return choice;
-    }
-
-    private String inputNumericString(Scanner sc, String message) {
-        String value;
-        do {
-            System.out.print(message);
-            value = sc.nextLine().trim();
-
-            if (!value.matches("\\d+")) {
-                System.out.println("Invalid input. ID must contain numbers only.");
-            }
-        } while (!value.matches("\\d+"));
-
-        return value;
-    }
-
-    public void addTrainingSession(TrainingSession trainingSession) {
-        if (searchTrainingSessionById(trainingSession.getTrainingId()) != null) {
-            System.out.println("Training ID already exists. Cannot add duplicate training session.");
+        if (findIndex(session.getTrainingId()) != -1) {
+            System.out.println("Training ID already exists.");
             return;
         }
 
-        trainingSessions.add(trainingSession);
+        sessions.add(session);
         System.out.println("Training session added successfully.");
     }
 
-    public TrainingSession searchTrainingSessionById(String trainingId) {
-        for (TrainingSession trainingSession : trainingSessions) {
-            if (trainingSession.getTrainingId().equalsIgnoreCase(trainingId.trim())) {
-                return trainingSession;
-            }
-        }
-        return null;
-    }
-
-    public void displayTrainingSessionById(String trainingId) {
-        TrainingSession trainingSession = searchTrainingSessionById(trainingId);
-
-        if (trainingSession != null) {
-            trainingSession.displayTrainingSessionInfo();
-        } else {
-            System.out.println("Training session not found.");
-        }
-    }
-
-    public void updateTrainingSession(String trainingId, Scanner sc) {
-        TrainingSession trainingSession = searchTrainingSessionById(trainingId);
-
-        if (trainingSession != null) {
-            trainingSession.updateTrainingSessionInfo(sc);
-            System.out.println("Training session updated successfully.");
-        } else {
-            System.out.println("Training session not found.");
-        }
-    }
-
-    public void deleteTrainingSession(String trainingId) {
-        TrainingSession trainingSession = searchTrainingSessionById(trainingId);
-
-        if (trainingSession != null) {
-            trainingSessions.remove(trainingSession);
-            System.out.println("Training session deleted successfully.");
-        } else {
-            System.out.println("Training session not found.");
-        }
-    }
-
-    public void displayAllTrainingSessions() {
-        if (trainingSessions.isEmpty()) {
-            System.out.println("No training sessions available.");
+    private void display() {
+        if (sessions.isEmpty()) {
+            System.out.println("No training session data available.");
             return;
         }
 
-        for (TrainingSession trainingSession : trainingSessions) {
-            trainingSession.displayTrainingSessionInfo();
-            System.out.println("-----------------------------");
+        for (int i = 0; i < sessions.size(); i++) {
+            System.out.println("\n--- Training Session " + (i + 1) + " ---");
+            sessions.get(i).show();
+        }
+    }
+
+    private void search(Scanner sc) {
+        System.out.print("Enter Training ID to search: ");
+        String id = sc.nextLine().trim();
+        int index = findIndex(id);
+
+        if (index == -1) {
+            System.out.println("Training session not found.");
+        } else {
+            sessions.get(index).show();
+        }
+    }
+
+    private void update(Scanner sc) {
+        System.out.print("Enter Training ID to update: ");
+        String id = sc.nextLine().trim();
+        int index = findIndex(id);
+
+        if (index == -1) {
+            System.out.println("Training session not found.");
+        } else {
+            sessions.get(index).update(sc);
+            System.out.println("Training session updated successfully.");
+        }
+    }
+
+    private void delete(Scanner sc) {
+        System.out.print("Enter Training ID to delete: ");
+        String id = sc.nextLine().trim();
+        int index = findIndex(id);
+
+        if (index == -1) {
+            System.out.println("Training session not found.");
+        } else {
+            sessions.remove(index);
+            System.out.println("Training session deleted successfully.");
+        }
+    }
+
+    private int findIndex(String id) {
+        for (int i = 0; i < sessions.size(); i++) {
+            if (sessions.get(i).getTrainingId().equals(id)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private int menu(Scanner sc) {
+        while (true) {
+            try {
+                System.out.print("Choose option: ");
+                int choice = Integer.parseInt(sc.nextLine().trim());
+                if (choice >= 1 && choice <= 6) {
+                    return choice;
+                }
+            } catch (NumberFormatException e) {
+                // The message below handles invalid input.
+            }
+            System.out.println("Please enter a number from 1 to 6.");
         }
     }
 }
