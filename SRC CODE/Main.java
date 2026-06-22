@@ -50,7 +50,7 @@ public class Main {
                     System.out.println("Program ended.");
                     break;
             }
-        } while (choice != 6);
+        } while (choice != 7);
 
         scanner.close();
     }
