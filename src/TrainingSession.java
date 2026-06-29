@@ -4,7 +4,9 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.Scanner;
 
-public class TrainingSession extends ClubRecord {
+
+public class TrainingSession {
+    private String trainingId;
     private String trainingDate;
     private String trainingLocation;
     private String trainingTopic;
@@ -13,12 +15,13 @@ public class TrainingSession extends ClubRecord {
             DateTimeFormatter.ofPattern("uuuu-MM-dd").withResolverStyle(ResolverStyle.STRICT);
 
     public TrainingSession() {
-        super();
     }
 
     public TrainingSession(String trainingId, String trainingDate,
                            String trainingLocation, String trainingTopic) {
-        super(trainingId);
+        if (trainingId != null && trainingId.matches("\\d+")) {
+            this.trainingId = trainingId;
+        }
         this.trainingDate = trainingDate;
         this.trainingLocation = trainingLocation;
         this.trainingTopic = trainingTopic;
@@ -26,7 +29,7 @@ public class TrainingSession extends ClubRecord {
 
     public void input(Scanner sc) {
         System.out.println("\n===== ENTER TRAINING SESSION =====");
-        setId(inputNumericId(sc, "Training ID: "));
+        trainingId = inputNumericId(sc, "Training ID: ");
         trainingDate = inputDate(sc, "Training Date (yyyy-MM-dd): ");
         trainingLocation = inputText(sc, "Training Location: ");
         trainingTopic = inputText(sc, "Training Topic: ");
@@ -37,6 +40,17 @@ public class TrainingSession extends ClubRecord {
         trainingDate = inputDate(sc, "New Training Date (yyyy-MM-dd): ");
         trainingLocation = inputText(sc, "New Training Location: ");
         trainingTopic = inputText(sc, "New Training Topic: ");
+    }
+
+    private String inputNumericId(Scanner sc, String label) {
+        while (true) {
+            System.out.print(label);
+            String value = sc.nextLine().trim();
+            if (value.matches("\\d+")) {
+                return value;
+            }
+            System.out.println("ID must contain numbers only.");
+        }
     }
 
     private String inputText(Scanner sc, String message) {
@@ -72,7 +86,13 @@ public class TrainingSession extends ClubRecord {
     }
 
     public String getTrainingId() {
-        return getId();
+        return trainingId;
+    }
+
+    public void setTrainingId(String trainingId) {
+        if (trainingId != null && trainingId.matches("\\d+")) {
+            this.trainingId = trainingId;
+        }
     }
 
     public String getTrainingDate() {
@@ -99,14 +119,8 @@ public class TrainingSession extends ClubRecord {
         this.trainingTopic = trainingTopic;
     }
 
-    @Override
-    public String getEntityType() {
-        return "Training Session";
-    }
-
-    @Override
     public void displayInfo() {
-        System.out.println("Training ID: " + getId());
+        System.out.println("Training ID: " + trainingId);
         System.out.println("Training Date: " + trainingDate);
         System.out.println("Training Location: " + trainingLocation);
         System.out.println("Training Topic: " + trainingTopic);

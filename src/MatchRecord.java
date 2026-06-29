@@ -4,7 +4,9 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.Scanner;
 
-public class MatchRecord extends ClubRecord {
+
+public class MatchRecord {
+    private String matchId;
     private String matchDate;
     private String opponentTeam;
     private String matchType;
@@ -13,11 +15,12 @@ public class MatchRecord extends ClubRecord {
             DateTimeFormatter.ofPattern("uuuu-MM-dd").withResolverStyle(ResolverStyle.STRICT);
 
     public MatchRecord() {
-        super();
     }
 
     public MatchRecord(String matchId, String matchDate, String opponentTeam, String matchType) {
-        super(matchId);
+        if (matchId != null && matchId.matches("\\d+")) {
+            this.matchId = matchId;
+        }
         this.matchDate = matchDate;
         this.opponentTeam = opponentTeam;
         this.matchType = matchType;
@@ -25,7 +28,7 @@ public class MatchRecord extends ClubRecord {
 
     public void inputMatchRecordInfo(Scanner sc) {
         System.out.println("\n===== ENTER MATCH RECORD =====");
-        setId(inputNumericId(sc, "Match ID: "));
+        matchId = inputNumericId(sc, "Match ID: ");
         matchDate = inputMatchDate(sc, "Match Date (yyyy-MM-dd): ");
         opponentTeam = inputRequiredValue(sc, "Opponent Team: ");
         matchType = inputRequiredValue(sc, "Match Type: ");
@@ -36,6 +39,17 @@ public class MatchRecord extends ClubRecord {
         matchDate = inputMatchDate(sc, "New Match Date (yyyy-MM-dd): ");
         opponentTeam = inputRequiredValue(sc, "New Opponent Team: ");
         matchType = inputRequiredValue(sc, "New Match Type: ");
+    }
+
+    private String inputNumericId(Scanner sc, String label) {
+        while (true) {
+            System.out.print(label);
+            String value = sc.nextLine().trim();
+            if (value.matches("\\d+")) {
+                return value;
+            }
+            System.out.println("ID must contain numbers only.");
+        }
     }
 
     private String inputRequiredValue(Scanner sc, String label) {
@@ -73,7 +87,13 @@ public class MatchRecord extends ClubRecord {
     }
 
     public String getMatchId() {
-        return getId();
+        return matchId;
+    }
+
+    public void setMatchId(String matchId) {
+        if (matchId != null && matchId.matches("\\d+")) {
+            this.matchId = matchId;
+        }
     }
 
     public String getMatchDate() {
@@ -100,14 +120,8 @@ public class MatchRecord extends ClubRecord {
         this.matchType = matchType;
     }
 
-    @Override
-    public String getEntityType() {
-        return "Match Record";
-    }
-
-    @Override
     public void displayInfo() {
-        System.out.println("Match ID: " + getId());
+        System.out.println("Match ID: " + matchId);
         System.out.println("Match Date: " + matchDate);
         System.out.println("Opponent Team: " + opponentTeam);
         System.out.println("Match Type: " + matchType);

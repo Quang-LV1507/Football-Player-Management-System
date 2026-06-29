@@ -3,8 +3,9 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
-/* Parent class for StarPlayer and RegularPlayer. */
-public abstract class Player extends ClubEntity {
+
+public abstract class Player {
+    private String playerId;
     private String fullName;
     private int age;
     private String nationality;
@@ -37,32 +38,46 @@ public abstract class Player extends ClubEntity {
     ));
 
     public Player() {
-        super();
     }
 
     public Player(String playerId, String fullName, int age, String nationality,
                   String position, int shirtNumber, double baseSalary, String status) {
-        super(playerId);
-        setFullName(fullName);
-        setAge(age);
-        setNationality(nationality);
-        setPosition(position);
-        setShirtNumber(shirtNumber);
-        setBaseSalary(baseSalary);
-        setStatus(status);
+        if (playerId != null && playerId.matches("\\d+")) {
+            this.playerId = playerId;
+        }
+        if (fullName != null && !fullName.trim().isEmpty()) {
+            this.fullName = fullName.trim();
+        }
+        if (age > 0) {
+            this.age = age;
+        }
+        if (nationality != null && countryCodes.contains(nationality.toUpperCase())) {
+            this.nationality = nationality.toUpperCase();
+        }
+        if (position != null && !position.trim().isEmpty()) {
+            this.position = position.trim();
+        }
+        if (shirtNumber > 0) {
+            this.shirtNumber = shirtNumber;
+        }
+        if (baseSalary >= 0) {
+            this.baseSalary = baseSalary;
+        }
+        if (status != null && (status.equalsIgnoreCase("active")
+                || status.equalsIgnoreCase("inactive"))) {
+            this.status = status.toLowerCase();
+        }
     }
 
     public abstract String getPlayerType();
+
     public abstract double calculateMonthlySalary();
 
-    @Override
-    public String getEntityType() {
-        return getPlayerType() + " Player";
-    }
+    public abstract void displayInfo();
 
     public void inputPlayerInfo(Scanner sc) {
         System.out.println("\n===== ENTER PLAYER INFORMATION =====");
-        setId(inputNumericId(sc, "Player ID: "));
+        playerId = inputNumericId(sc, "Player ID: ");
         fullName = readRequiredText(sc, "Full Name: ");
         age = readPositiveInteger(sc, "Age: ");
         nationality = readNationalityCode(sc, "Nationality code, example VNM, USA: ");
@@ -84,7 +99,7 @@ public abstract class Player extends ClubEntity {
     }
 
     protected void displayCommonPlayerInfo() {
-        System.out.println("Player ID: " + getId());
+        System.out.println("Player ID: " + playerId);
         System.out.println("Full Name: " + fullName);
         System.out.println("Age: " + age);
         System.out.println("Nationality: " + nationality);
@@ -92,6 +107,17 @@ public abstract class Player extends ClubEntity {
         System.out.println("Shirt Number: " + shirtNumber);
         System.out.println("Base Salary: " + baseSalary);
         System.out.println("Status: " + status);
+    }
+
+    private String inputNumericId(Scanner sc, String label) {
+        while (true) {
+            System.out.print(label);
+            String value = sc.nextLine().trim();
+            if (value.matches("\\d+")) {
+                return value;
+            }
+            System.out.println("ID must contain numbers only.");
+        }
     }
 
     private String readRequiredText(Scanner sc, String label) {
@@ -158,11 +184,13 @@ public abstract class Player extends ClubEntity {
     }
 
     public String getPlayerId() {
-        return getId();
+        return playerId;
     }
 
     public void setPlayerId(String playerId) {
-        setId(playerId);
+        if (playerId != null && playerId.matches("\\d+")) {
+            this.playerId = playerId;
+        }
     }
 
     public String getFullName() {

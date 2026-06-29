@@ -1,6 +1,8 @@
 import java.util.Scanner;
 
-public class Salary extends ClubRecord {
+
+public class Salary {
+    private String salaryId;
     private String playerId;
     private int month;
     private int year;
@@ -9,23 +11,34 @@ public class Salary extends ClubRecord {
     private double totalSalary;
 
     public Salary() {
-        super();
     }
 
     public Salary(String salaryId, String playerId, int month, int year,
                   double playerMonthlySalary, double performanceBonus) {
-        super(salaryId);
-        this.playerId = playerId;
-        this.month = month;
-        this.year = year;
-        this.playerMonthlySalary = playerMonthlySalary;
-        this.performanceBonus = performanceBonus;
+        if (salaryId != null && salaryId.matches("\\d+")) {
+            this.salaryId = salaryId;
+        }
+        if (playerId != null && playerId.matches("\\d+")) {
+            this.playerId = playerId;
+        }
+        if (month >= 1 && month <= 12) {
+            this.month = month;
+        }
+        if (year >= 2026) {
+            this.year = year;
+        }
+        if (playerMonthlySalary >= 0) {
+            this.playerMonthlySalary = playerMonthlySalary;
+        }
+        if (performanceBonus >= 0) {
+            this.performanceBonus = performanceBonus;
+        }
         calculateTotalSalary();
     }
 
     public void inputSalaryInformation(Scanner sc) {
         System.out.println("\n===== ENTER SALARY INFORMATION =====");
-        setId(inputNumericId(sc, "Salary ID: "));
+        salaryId = inputNumericId(sc, "Salary ID: ");
         playerId = inputNumericId(sc, "Player ID: ");
         month = inputMonth(sc, "Month (1-12): ");
         year = inputYear(sc, "Year (from 2026): ");
@@ -39,6 +52,17 @@ public class Salary extends ClubRecord {
         year = inputYear(sc, "New Year (from 2026): ");
         performanceBonus = inputNonNegativeDouble(sc, "New Performance Bonus: ");
         calculateTotalSalary();
+    }
+
+    private String inputNumericId(Scanner sc, String label) {
+        while (true) {
+            System.out.print(label);
+            String value = sc.nextLine().trim();
+            if (value.matches("\\d+")) {
+                return value;
+            }
+            System.out.println("ID must contain numbers only.");
+        }
     }
 
     private int inputMonth(Scanner sc, String message) {
@@ -91,11 +115,23 @@ public class Salary extends ClubRecord {
     }
 
     public String getSalaryId() {
-        return getId();
+        return salaryId;
+    }
+
+    public void setSalaryId(String salaryId) {
+        if (salaryId != null && salaryId.matches("\\d+")) {
+            this.salaryId = salaryId;
+        }
     }
 
     public String getPlayerId() {
         return playerId;
+    }
+
+    public void setPlayerId(String playerId) {
+        if (playerId != null && playerId.matches("\\d+")) {
+            this.playerId = playerId;
+        }
     }
 
     public int getMonth() {
@@ -152,14 +188,8 @@ public class Salary extends ClubRecord {
         return totalSalary;
     }
 
-    @Override
-    public String getEntityType() {
-        return "Salary Record";
-    }
-
-    @Override
     public void displayInfo() {
-        System.out.println("Salary ID: " + getId());
+        System.out.println("Salary ID: " + salaryId);
         System.out.println("Player ID: " + playerId);
         System.out.println("Month: " + month);
         System.out.println("Year: " + year);

@@ -4,7 +4,9 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.Scanner;
 
-public class Contract extends ClubRecord {
+
+public class Contract {
+    private String contractId;
     private String playerId;
     private String startDate;
     private String endDate;
@@ -14,20 +16,27 @@ public class Contract extends ClubRecord {
             DateTimeFormatter.ofPattern("uuuu-MM-dd").withResolverStyle(ResolverStyle.STRICT);
 
     public Contract() {
-        super();
     }
 
-    public Contract(String contractId, String playerId, String startDate, String endDate, String contractStatus) {
-        super(contractId);
-        this.playerId = playerId;
+    public Contract(String contractId, String playerId, String startDate,
+                    String endDate, String contractStatus) {
+        if (contractId != null && contractId.matches("\\d+")) {
+            this.contractId = contractId;
+        }
+        if (playerId != null && playerId.matches("\\d+")) {
+            this.playerId = playerId;
+        }
         this.startDate = startDate;
         this.endDate = endDate;
-        this.contractStatus = contractStatus;
+        if (contractStatus != null && (contractStatus.equalsIgnoreCase("active")
+                || contractStatus.equalsIgnoreCase("inactive"))) {
+            this.contractStatus = contractStatus.toLowerCase();
+        }
     }
 
     public void inputContractInformation(Scanner sc) {
         System.out.println("\n===== ENTER CONTRACT INFORMATION =====");
-        setId(inputNumericId(sc, "Contract ID: "));
+        contractId = inputNumericId(sc, "Contract ID: ");
         playerId = inputNumericId(sc, "Player ID: ");
         startDate = enterContractDate(sc, "Start Date (yyyy-MM-dd): ");
         endDate = enterEndDate(sc, "End Date (yyyy-MM-dd): ", startDate);
@@ -39,6 +48,17 @@ public class Contract extends ClubRecord {
         startDate = enterContractDate(sc, "New Start Date (yyyy-MM-dd): ");
         endDate = enterEndDate(sc, "New End Date (yyyy-MM-dd): ", startDate);
         contractStatus = enterContractStatus(sc, "New Contract Status (active/inactive): ");
+    }
+
+    private String inputNumericId(Scanner sc, String label) {
+        while (true) {
+            System.out.print(label);
+            String value = sc.nextLine().trim();
+            if (value.matches("\\d+")) {
+                return value;
+            }
+            System.out.println("ID must contain numbers only.");
+        }
     }
 
     private String enterContractStatus(Scanner sc, String label) {
@@ -88,11 +108,23 @@ public class Contract extends ClubRecord {
     }
 
     public String getContractId() {
-        return getId();
+        return contractId;
+    }
+
+    public void setContractId(String contractId) {
+        if (contractId != null && contractId.matches("\\d+")) {
+            this.contractId = contractId;
+        }
     }
 
     public String getPlayerId() {
         return playerId;
+    }
+
+    public void setPlayerId(String playerId) {
+        if (playerId != null && playerId.matches("\\d+")) {
+            this.playerId = playerId;
+        }
     }
 
     public String getStartDate() {
@@ -116,17 +148,15 @@ public class Contract extends ClubRecord {
     }
 
     public void setContractStatus(String contractStatus) {
-        this.contractStatus = contractStatus;
+        if (contractStatus != null
+                && (contractStatus.equalsIgnoreCase("active")
+                || contractStatus.equalsIgnoreCase("inactive"))) {
+            this.contractStatus = contractStatus.toLowerCase();
+        }
     }
 
-    @Override
-    public String getEntityType() {
-        return "Contract";
-    }
-
-    @Override
     public void displayInfo() {
-        System.out.println("Contract ID: " + getId());
+        System.out.println("Contract ID: " + contractId);
         System.out.println("Player ID: " + playerId);
         System.out.println("Start Date: " + startDate);
         System.out.println("End Date: " + endDate);
